@@ -1,5 +1,5 @@
 # Game Options/Settings
-TITLE = "Szybkie skoki"
+TITLE = "Fast Jumps"
 WIDTH = 800
 HEIGHT = 600
 FPS = 60
