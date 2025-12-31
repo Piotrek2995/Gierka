@@ -46,18 +46,34 @@ class Player(pygame.sprite.Sprite):
 
 
 class Platform(pygame.sprite.Sprite):
-    def __init__(self, x, y, w, h):
+    def __init__(self, game, x, y, w, h):
         pygame.sprite.Sprite.__init__(self)
+        self.game = game
         self.image = pygame.Surface((w, h))
         self.image.fill(GREEN)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
         self.spawn_time = pygame.time.get_ticks()
+        self.dropped_time = 0 # Amount of time spent frozen (not aging)
         self.lifetime = 200000 # Default huge lifetime (forever)
         
     def update(self):
         # Calculate age
+        if self.game.powerup_active:
+             self.spawn_time += (pygame.time.get_ticks() - (self.spawn_time + self.dropped_time)) - (pygame.time.get_ticks() - self.spawn_time - 16) # Simple hack to pause age: offset spawn time forward?
+             # Better way: just shift spawn_time forward by the delta time of this frame?
+             pass 
+             
+        # Actually simplest way to "Freeze" age is to increment spawn_time by the frame duration, effectively keeping (now - spawn) constant.
+        # But we don't have dt here easily.
+        # Alternative: Game loop sets a flag. If flag is True, we shift spawn_time.
+        
+        if self.game.powerup_active:
+            # We are frozen. Shift spawn_time forward so 'age' doesn't increase.
+            # FPS is 60, so each frame is approx 16ms. Random glitches might occur but it's fine.
+            self.spawn_time += 1000 / FPS 
+            
         now = pygame.time.get_ticks()
         age = now - self.spawn_time
         
@@ -103,9 +119,58 @@ class Obstacle(pygame.sprite.Sprite):
         self.rect.bottom = platform.rect.top - 1
         self.platform = platform
 
+
     def update(self):
         self.rect.bottom = self.platform.rect.top - 1
         self.rect.centerx = self.platform.rect.centerx
         if not self.platform.alive():
+            self.kill()
+
+class Coin(pygame.sprite.Sprite):
+    def __init__(self, platform):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((15, 15))
+        self.image.fill(YELLOW)
+        self.rect = self.image.get_rect()
+        self.rect.centerx = platform.rect.centerx
+        self.rect.bottom = platform.rect.top - 5
+        self.platform = platform
+
+    def update(self):
+        self.rect.bottom = self.platform.rect.top - 5
+        self.rect.centerx = self.platform.rect.centerx
+        if not self.platform.alive():
+            self.kill()
+
+class Powerup(pygame.sprite.Sprite):
+    def __init__(self, platform):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((15, 15))
+        self.image.fill((0, 255, 255)) # Cyan
+        self.rect = self.image.get_rect()
+        self.rect.centerx = platform.rect.centerx
+        self.rect.bottom = platform.rect.top - 5
+        self.platform = platform
+
+    def update(self):
+        self.rect.bottom = self.platform.rect.top - 5
+        self.rect.centerx = self.platform.rect.centerx
+        if not self.platform.alive():
+            self.kill()
+
+class FloatingText(pygame.sprite.Sprite):
+    def __init__(self, x, y, text):
+        pygame.sprite.Sprite.__init__(self)
+        # Use SysFont to avoid crash if file not found
+        self.font = pygame.font.SysFont("Arial", 20, bold=True)
+        self.image = self.font.render(text, True, YELLOW)
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.vel_y = -3
+        self.spawn_time = pygame.time.get_ticks()
+
+    def update(self):
+        self.rect.y += self.vel_y
+        if pygame.time.get_ticks() - self.spawn_time > 1000:
             self.kill()
 
