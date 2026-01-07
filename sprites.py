@@ -159,10 +159,9 @@ class Powerup(pygame.sprite.Sprite):
             self.kill()
 
 class FloatingText(pygame.sprite.Sprite):
-    def __init__(self, x, y, text):
+    def __init__(self, x, y, text, font):
         pygame.sprite.Sprite.__init__(self)
-        # Use SysFont to avoid crash if file not found
-        self.font = pygame.font.SysFont("Arial", 20, bold=True)
+        self.font = font
         self.image = self.font.render(text, True, YELLOW)
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)

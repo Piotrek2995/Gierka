@@ -13,6 +13,9 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         self.font_name = pygame.font.match_font('arial')
+        self.font_small = pygame.font.Font(self.font_name, 22)
+        self.font_large = pygame.font.Font(self.font_name, 48)
+        self.font_mini = pygame.font.Font(self.font_name, 20)
 
     def new(self):
         # start a new game
@@ -100,7 +103,7 @@ class Game:
         if hits:
              self.score += 100
              for hit in hits:
-                 text = FloatingText(hit.rect.centerx, hit.rect.centery, "+100")
+                 text = FloatingText(hit.rect.centerx, hit.rect.centery, "+100", self.font_mini)
                  self.all_sprites.add(text)
              
         # Check for powerup collision
@@ -187,19 +190,19 @@ class Game:
                 self.all_sprites.add(p)
                 
                 # Chance to spawn items
-                if random.randrange(100) < 15 and p.rect.width > 60: # 15% chance for obstacle, only on wider platforms
+                if random.randrange(100) < 10 and p.rect.width > 60: # 10% chance for obstacle, only on wider platforms
                     o = Obstacle(p)
                     self.obstacles.add(o)
                     self.all_sprites.add(o)
-                elif random.randrange(100) < 10: # 10% chance for trampoline
+                elif random.randrange(100) < 8: # 8% chance for trampoline
                     t = Trampoline(p)
                     self.trampolines.add(t)
                     self.all_sprites.add(t)
-                elif random.randrange(100) < 10: # 10% chance for Coin (Reduced from 20%)
+                elif random.randrange(100) < 8: # 8% chance for Coin (Reduced from 20%)
                     c = Coin(p)
                     self.coins.add(c)
                     self.all_sprites.add(c)
-                elif random.randrange(100) < 5: # 5% chance for Powerup (Reduced from 10%)
+                elif random.randrange(100) < 4: # 4% chance for Powerup (Reduced from 10%)
                     pow = Powerup(p)
                     self.powerups.add(pow)
                     self.all_sprites.add(pow)
@@ -244,7 +247,14 @@ class Game:
                     self.player.jump()
 
     def draw_text(self, text, size, color, x, y):
-        font = pygame.font.Font(self.font_name, size)
+        # font = pygame.font.Font(self.font_name, size) # Removed for performance
+        if size == 48:
+            font = self.font_large
+        elif size == 20:
+             font = self.font_mini
+        else:
+            font = self.font_small
+            
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect()
         text_rect.midtop = (x, y)
