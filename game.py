@@ -16,6 +16,7 @@ class Game:
         self.font_small = pygame.font.Font(self.font_name, 22)
         self.font_large = pygame.font.Font(self.font_name, 48)
         self.font_mini = pygame.font.Font(self.font_name, 20)
+        self.first_game = True  # flaga na pokazanie menu pomocy tylko przy pierwszej grze
 
     def new(self):
         # start a new game
@@ -303,6 +304,51 @@ class Game:
         self.draw_text(TITLE, 48, WHITE, WIDTH / 2, HEIGHT / 4)
         self.draw_text("Arrows to move, Space to jump", 22, WHITE, WIDTH / 2, HEIGHT / 2)
         self.draw_text("Press a key to play", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4)
+        pygame.display.flip()
+        self.wait_for_key()
+
+        # Pokaz menu pomocy tylko przy pierwszej grze
+        if self.first_game:
+            self.show_help_screen()
+            self.first_game = False
+
+    def show_help_screen(self):
+        # Menu pomocy z opisem elementów gry
+        self.screen.fill(BGCOLOR)
+        self.draw_text("JAK GRAC?", 48, WHITE, WIDTH / 2, 30)
+
+        # Opisy elementów
+        y_start = 120
+        line_height = 50
+
+        # Platformy
+        pygame.draw.rect(self.screen, GREEN, pygame.Rect(50, y_start, 60, 15), border_radius=3)
+        self.draw_text("PLATFORMY - skacz po nich, ale uwazaj - znikaja po czasie!", 20, WHITE, WIDTH / 2 + 20, y_start - 5)
+
+        # Kolce/Przeszkody
+        points = [(50, y_start + line_height + 20), (74, y_start + line_height), (98, y_start + line_height + 20)]
+        pygame.draw.polygon(self.screen, RED, points)
+        self.draw_text("KOLCE - dotkniesz = game over!", 20, WHITE, WIDTH / 2 + 20, y_start + line_height)
+
+        # Trampolina
+        pygame.draw.rect(self.screen, BLUE, pygame.Rect(50, y_start + line_height * 2, 50, 10), border_radius=3)
+        pygame.draw.rect(self.screen, (30, 30, 30), pygame.Rect(50, y_start + line_height * 2 + 10, 50, 5))
+        self.draw_text("TRAMPOLINA - daje super wysoki skok!", 20, WHITE, WIDTH / 2 + 20, y_start + line_height * 2)
+
+        # Moneta
+        pygame.draw.circle(self.screen, (255, 215, 0), (74, y_start + line_height * 3 + 10), 12)
+        pygame.draw.circle(self.screen, (180, 140, 0), (74, y_start + line_height * 3 + 10), 12, 2)
+        self.draw_text("MONETA - zbieraj po +100 punktow!", 20, WHITE, WIDTH / 2 + 20, y_start + line_height * 3)
+
+        # Powerup
+        cx, cy = 74, y_start + line_height * 4 + 10
+        pygame.draw.line(self.screen, (0, 255, 255), (cx, cy - 10), (cx, cy + 10), 2)
+        pygame.draw.line(self.screen, (0, 255, 255), (cx - 10, cy), (cx + 10, cy), 2)
+        pygame.draw.circle(self.screen, (180, 255, 255), (cx, cy), 5)
+        self.draw_text("POWERUP - zamraza platformy na 5 sekund!", 20, WHITE, WIDTH / 2 + 20, y_start + line_height * 4)
+
+        self.draw_text("Nacisnij klawisz aby zaczac gre!", 22, YELLOW, WIDTH / 2, HEIGHT - 80)
+
         pygame.display.flip()
         self.wait_for_key()
 
